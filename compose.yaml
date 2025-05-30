@@ -1,0 +1,55 @@
+services:
+
+  mysql1:
+    image: mysql-server:latest
+    ports:
+      - "3307:3306"
+    container_name: mysql1
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    container_name: mongolalala
+
+
+  redis:
+    image: redis-server
+    ports:
+      - "6379:6379"
+    container_name: huydzredis
+    command: --requirepass '789'
+
+
+  connect:
+    image: quay.io/debezium/connect:3.0
+    links:
+      - kafka:kafka
+      - mysql1:mysql
+    ports:
+      - "8083:8083"
+    tty: true
+    stdin_open: true
+    environment:
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+
+  kafka:
+    image: quay.io/debezium/kafka:3.0
+    ports:
+      - "9092:9092"
+    links:
+      - zookeeper:zookeeper
+    tty: true
+    stdin_open: true
+
+  zookeeper:
+    image: quay.io/debezium/zookeeper:3.0
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+    tty: true
+    stdin_open: true
